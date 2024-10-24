@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+    
+    <!-- jQuery for AJAX requests -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Custom CSS for styling -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f7;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #4CAF50;
+            padding: 15px;
+            text-align: center;
+            color: white;
+            font-size: 24px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .form-container {
+            width: 48%;
+            padding: 20px;
+            background-color: #f9f9f9;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .form-container h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        .form-container input, .form-container button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-container button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .form-container button:hover {
+            background-color: #45a049;
+        }
+        .forms {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        #dynamic-data {
+            background-color: #f1f1f1;
+            padding: 20px;
+            border-radius: 4px;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+        }
+    </style>
+
+    <!-- JavaScript for dynamic content and form submissions -->
+    <script>
+        $(document).ready(function() {
+            // Function to update dynamic data
+            function updateData() {
+                $.ajax({
+                    url: '/update',
+                    type: 'GET',
+                    success: function(response) {
+                        $('#dynamic-data').html(response);
+                    },
+                    error: function() {
+                        $('#dynamic-data').html('<p class="error">Error fetching data</p>');
+                    }
+                });
+            }
+
+            // Initial data load
+            updateData();
+
+            // Handle form submission for adding data
+            $('form#addForm').submit(function(event) {
+                event.preventDefault(); // Prevent default form submission
+                $.ajax({
+                    type: 'POST',
+                    url: '/submit',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Student added successfully');
+                            $('#name').val('');
+                            $('#birthday').val('');
+                            $('#id').val('');
+                            $('#major').val('');
+                            updateData();  // Reload the data after successful submission
+                        } else {
+                            alert(response.status || 'Error adding student');
+                        }
+                    },
+                    error: function() {
+                        alert('Error adding student');
+                    }
+                });
+            });
+
+            // Handle form submission for deleting data
+            $('form#deleteForm').submit(function(event) {
+                event.preventDefault(); // Prevent default form submission
+                $.ajax({
+                    type: 'POST',
+                    url: '/delete',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Student deleted successfully');
+                            $('#delete_id').val('');
+                            updateData();  // Reload the data after successful deletion
+                        } else {
+                            alert(response.status || 'Error deleting student');
+                        }
+                    },
+                    error: function() {
+                        alert('Error deleting student');
+                    }
+                });
+            });
+        });
+    </script>
+    
+    <!-- Kommunicate Chatbot -->
+    
+    <!-- Kommunicate Chatbot -->
+</head>
+<body>
+    <div class="header">Student Management System</div>
+
+    <div class="container">
+        <div class="forms">
+            <!-- Add student form -->
+            <div class="form-container">
+                <h2>Add New Student</h2>
+                <form id="addForm" action="/submit" method="POST">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" required><br>
+                    <label for="birthday">Birthday:</label>
+                    <input type="date" id="birthday" name="birthday" required><br>
+                    <label for="id">ID:</label>
+                    <input type="text" id="id" name="id" required><br>
+                    <label for="major">Major:</label>
+                    <input type="text" id="major" name="major" required><br>
+                    <button type="submit">Submit</button>
+                </form>
+            </div>
+
+            <!-- Remove student form -->
+            <div class="form-container">
+                <h2>Remove Student</h2>
+                <form id="deleteForm" action="/delete" method="POST">
+                    <label for="delete_id">ID to Delete:</label>
+                    <input type="text" id="delete_id" name="id" required><br>
+                    <button type="submit">Delete</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Dynamic data display -->
+        <div id="dynamic-data">
+            <!-- Dynamic content will be loaded here -->
+        </div>
+    </div>
+</body>
+</html>
